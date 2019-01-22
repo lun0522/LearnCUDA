@@ -3,4 +3,4 @@ project(LearnCUDA)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(LearnCUDA main.cpp util.cpp util.h matrix.cpp matrix.h)
+add_executable(LearnCUDA main.cpp matrix.cpp matrix.h)

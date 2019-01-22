@@ -1,17 +1,18 @@
 #include <iostream>
 
-#include "util.h"
+#include "matrix.h"
 
 using namespace std;
-using namespace Util;
 
 int main() {
     try {
-        const UInt width = 16, height = 16;
-        const string filename = "matrix";
-        const bool verbose = true;
-        GenMatrixFile(filename, width, height, verbose);
-        ReadMatrixFile(filename, width, height, verbose);
+        const Matrix::UInt width = 16, height = 16;
+        const string path = "matrix";
+
+        Matrix::setVerbose(true);
+        Matrix m {width, height};
+        m.dump(path);
+        Matrix n {path};
     } catch (const exception& e) {
         cout << e.what() << endl;
         exit(-1);
