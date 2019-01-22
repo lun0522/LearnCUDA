@@ -3,13 +3,14 @@
 #include "matrix.h"
 
 using namespace std;
+using namespace Math;
 
 int main() {
     try {
-        const Matrix::UInt width = 16, height = 16;
-        const string path = "matrix";
+        const UInt width = 16, height = 16;
+        const string path = "mat";
 
-        Matrix::setVerbose(true);
+        setVerbose(true);
         Matrix m {width, height};
         m.dump(path);
         Matrix n {path};

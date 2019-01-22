@@ -5,30 +5,37 @@
 #ifndef LEARNCUDA_MATRIX_H
 #define LEARNCUDA_MATRIX_H
 
+#include <iostream>
 #include <string>
 
-class Matrix {
-public:
+namespace Math {
+    using namespace std;
     using UInt = unsigned int;
-    struct Dims {
-        UInt width;
-        UInt height;
+
+    class Matrix {
+    public:
+        struct Dims {
+            UInt width;
+            UInt height;
+        };
+
+        explicit Matrix(UInt width, UInt height);
+        explicit Matrix(const string& path);
+        ~Matrix();
+
+        Dims getDims() const;
+        const UInt* getData() const;
+        void print() const;
+        void dump(const string& path) const;
+
+    private:
+        Dims dims;
+        UInt* data;
     };
 
-    explicit Matrix(UInt width, UInt height);
-    explicit Matrix(const std::string& path);
-    ~Matrix();
-
-    Dims getDims() const;
-    const UInt* getData() const;
-    void print() const;
-    void dump(const std::string& path) const;
+    static bool verbose = true;
     static void setVerbose(bool v) { verbose = v; }
-
-private:
-    static bool verbose;
-    Dims dims;
-    UInt* data;
-};
+    ostream& operator<<(ostream& os, const Matrix& matrix);
+}
 
 #endif //LEARNCUDA_MATRIX_H
