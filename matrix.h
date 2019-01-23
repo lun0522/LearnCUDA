@@ -10,32 +10,38 @@
 
 namespace Math {
     using namespace std;
-    using UInt = unsigned int;
 
     class Matrix {
     public:
         struct Dims {
-            UInt width;
-            UInt height;
+            uint width;
+            uint height;
         };
 
-        explicit Matrix(UInt width, UInt height);
+        explicit Matrix(uint width, uint height);
         explicit Matrix(const string& path);
+        Matrix(const Matrix& other);
+        Matrix(Matrix&& other) noexcept;
         ~Matrix();
 
-        Dims getDims() const;
-        const UInt* getData() const;
+        static void setVerbose(bool v) { verbose = v; }
+        Dims getDims() const { return dims; }
+        const uint* getData() const { return data; }
+
+        friend ostream& operator<<(ostream& os, const Matrix& matrix);
+        bool operator==(const Matrix& other) const;
+        Matrix& operator=(const Matrix& other);
+        Matrix& operator=(Matrix&& other) noexcept;
+
+        void clear();
         void print() const;
         void dump(const string& path) const;
 
     private:
+        static bool verbose;
         Dims dims;
-        UInt* data;
+        uint* data;
     };
-
-    static bool verbose = true;
-    static void setVerbose(bool v) { verbose = v; }
-    ostream& operator<<(ostream& os, const Matrix& matrix);
 }
 
 #endif //LEARNCUDA_MATRIX_H
