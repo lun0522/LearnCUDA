@@ -50,6 +50,15 @@ namespace Math {
         }
     }
 
+    Matrix::Matrix(const MatrixXi& other):
+        dims {(uint)other.cols(), (uint)other.rows()} {
+        uint size = dims.width * dims.height;
+        data = (uint *)malloc(size * sizeof(uint));
+        for (uint i = 0; i < dims.height; ++i)
+            for (uint j = 0; j < dims.width; ++j)
+                (*this)(i, j) = other(i, j);
+    }
+
     Matrix::Matrix(const string &path) {
         if (verbose)
             cout << "Reading matrix from file " << path << endl;
@@ -76,7 +85,7 @@ namespace Math {
 
         uint size = dims.width * dims.height;
         data = (uint *)malloc(size * sizeof(uint));
-        copy(other.data, other.data + size, data);
+        memcpy(data, other.getData(), size * sizeof(uint));
     }
 
     Matrix::Matrix(Matrix&& other) noexcept {
@@ -131,7 +140,7 @@ namespace Math {
 
         if (verbose)
             cout << "Assigning " << *this << endl;
-        copy(other.data, other.data + dims.width * dims.height, data);
+        memcpy(data, other.getData(), dims.width * dims.height * sizeof(uint));
         return *this;
     }
 
@@ -144,8 +153,12 @@ namespace Math {
         return *this;
     }
 
-    void Matrix::clear() {
-        memset(data, 0, dims.width * dims.height * sizeof(uint));
+    Matrix::operator MatrixXi() const {
+        MatrixXi ret {dims.height, dims.width};
+        for (uint i = 0; i < dims.height; ++i)
+            for (uint j = 0; j < dims.width; ++j)
+                ret(i, j) = (*this)(i, j);
+        return ret;
     }
 
     void Matrix::print() const {

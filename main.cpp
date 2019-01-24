@@ -1,3 +1,4 @@
+#include <Dense>
 #include <iostream>
 
 #include "macro.h"
@@ -31,13 +32,16 @@ void testReadWrite() {
 void testCmp() {
     BEGIN_TEST
     Matrix m {16, 16};
-    Matrix n {15, 15};
+    Matrix q {15, 15};
     try {
-        if (m == n) {}
-        assert(1);
+        if (m == q) {}
+        assert(0);
     } catch (const exception& e) {
         cout << e.what() << " (Expected behavior)" << endl;
     }
+
+    Matrix n {16, 16, Matrix::Mode::unit};
+    assert(verifyMatMul(m, n, m));
 }
 
 void testCopy() {
@@ -87,9 +91,7 @@ void testAll() {
 
 int main() {
     try {
-//        testAll();
-        Matrix::setVerbose(true);
-        testMove();
+        testAll();
     } catch (const exception& e) {
         cout << e.what() << endl;
         exit(-1);
