@@ -1,11 +1,23 @@
 #include <iostream>
 
+#include "macro.h"
 #include "matrix.h"
 
 using namespace std;
 using namespace Math;
 
+void testGenMatrix() {
+    BEGIN_TEST
+    Matrix m {16, 16, Matrix::Mode::random};
+    m.print();
+    Matrix n {16, 16, Matrix::Mode::unit};
+    n.print();
+    Matrix p {16, 16, Matrix::Mode::zero};
+    p.print();
+}
+
 void testReadWrite() {
+    BEGIN_TEST
     const string path = "mat";
     Matrix m {16, 16};
     m.print();
@@ -17,6 +29,7 @@ void testReadWrite() {
 }
 
 void testCmp() {
+    BEGIN_TEST
     Matrix m {16, 16};
     Matrix n {15, 15};
     try {
@@ -28,6 +41,7 @@ void testCmp() {
 }
 
 void testCopy() {
+    BEGIN_TEST
     Matrix m {16, 16};
     Matrix n {m};
     m.print();
@@ -40,18 +54,18 @@ void testCopy() {
 }
 
 void testAssign() {
-    Matrix m {16, 16};
-    Matrix n {16, 16};
-    m.print();
-    n.clear();
-    n.print();
+    BEGIN_TEST
+    Matrix m {16, 16, Matrix::Mode::random};
+    Matrix n {16, 16, Matrix::Mode::zero};
     n = m;
+    m.print();
     n.print();
 
     assert(m == n);
 }
 
 void testMove() {
+    BEGIN_TEST
     Matrix m {16, 16};
     Matrix n {15, 15};
     n = move(m);
@@ -62,13 +76,19 @@ void testMove() {
     assert(n.getDims().height == 16);
 }
 
+void testAll() {
+    Matrix::setVerbose(true);
+    for (auto func : {testGenMatrix, testReadWrite, testCmp,
+                      testCopy, testAssign, testMove}) {
+        func();
+        cout << endl;
+    }
+}
+
 int main() {
     try {
+//        testAll();
         Matrix::setVerbose(true);
-        testReadWrite();
-        testCmp();
-        testCopy();
-        testAssign();
         testMove();
     } catch (const exception& e) {
         cout << e.what() << endl;

@@ -18,7 +18,13 @@ namespace Math {
             uint height;
         };
 
-        explicit Matrix(uint width, uint height);
+        enum class Mode {
+            random,
+            unit,
+            zero,
+        };
+
+        explicit Matrix(uint width, uint height, Mode mode = Mode::random);
         explicit Matrix(const string& path);
         Matrix(const Matrix& other);
         Matrix(Matrix&& other) noexcept;

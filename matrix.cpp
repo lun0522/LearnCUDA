@@ -5,21 +5,49 @@
 #include "matrix.h"
 
 #include <fstream>
+#include <random>
 
-#define DEBUG_INFO(info) string{"Fatal error! "} + __func__ + "() in file " + \
-__FILE__ + " on line " + to_string(__LINE__) + ": \n\t" + info
+#include "macro.h"
 
 namespace Math {
     bool Matrix::verbose {false};
 
-    Matrix::Matrix(uint width, uint height): dims {width, height} {
-        if (verbose)
-            cout << "Generating " << *this << endl;
+    Matrix::Matrix(uint width, uint height, Mode mode):
+        dims {width, height} {
+        uint size = width * height;
+        data = (uint *)malloc(size * sizeof(uint));
+        switch (mode) {
+            case Mode::random: {
+                if (verbose)
+                    cout << "Generating " << *this << " (random)" << endl;
 
-        data = (uint *)malloc(width * height * sizeof(uint));
-        for (uint i = 0; i < height; ++i)
-            for (uint j = 0; j < width; ++j)
-                data[i * width + j] = i + j + 1;
+                mt19937 randGen;
+                randGen.seed(random_device{}());
+                uniform_int_distribution<mt19937::result_type> rand10 {0, 9};
+                for (uint i = 0; i < size; ++i)
+                    data[i] = rand10(randGen);
+                break;
+            }
+            case Mode::unit: {
+                if (width != height)
+                    throw runtime_error("Cannot create non-square unit matrix");
+
+                if (verbose)
+                    cout << "Generating " << *this << " (unit)" << endl;
+
+                memset(data, 0, size * sizeof(uint));
+                for (uint i = 0; i < height; ++i)
+                    data[i * width + i] = 1;
+                break;
+            }
+            case Mode::zero: {
+                if (verbose)
+                    cout << "Generating " << *this << " (zero)" << endl;
+
+                memset(data, 0, size * sizeof(uint));
+                break;
+            }
+        }
     }
 
     Matrix::Matrix(const string &path) {
