@@ -11,23 +11,27 @@
 
 namespace Math {
     using namespace std;
-    using Eigen::MatrixXi;
+    using Eigen::MatrixXf;
 
     class Matrix {
     public:
-        struct Dims {
-            uint width;
-            uint height;
-        };
+        using val_t = float;
+        using dim_t = unsigned int;
 
+        struct Dims {
+            dim_t width;
+            dim_t height;
+        };
         enum class Mode {
-            random,
+            randFloat,
+            randInt,
+            undefined,
             unit,
             zero,
         };
 
-        explicit Matrix(uint width, uint height, Mode mode = Mode::random);
-        explicit Matrix(const MatrixXi& other);
+        explicit Matrix(dim_t width, dim_t height, Mode mode);
+        explicit Matrix(const MatrixXf& other);
         explicit Matrix(const string& path);
         Matrix(const Matrix& other);
         Matrix(Matrix&& other) noexcept;
@@ -35,14 +39,16 @@ namespace Math {
 
         static void setVerbose(bool v) { verbose = v; }
         Dims getDims() const { return dims; }
-        const uint* getData() const { return data; }
+        const val_t* getData() const { return data; }
 
-        uint& operator()(uint row, uint col) const { return data[row * dims.width + col]; }
+        val_t& operator()(dim_t row, dim_t col) const {
+            return data[row * dims.width + col];
+        }
         friend ostream& operator<<(ostream& os, const Matrix& matrix);
         bool operator==(const Matrix& other) const;
         Matrix& operator=(const Matrix& other);
         Matrix& operator=(Matrix&& other) noexcept;
-        operator MatrixXi() const;
+        operator MatrixXf() const;
 
         void print() const;
         void dump(const string& path) const;
@@ -50,11 +56,11 @@ namespace Math {
     private:
         static bool verbose;
         Dims dims;
-        uint* data;
+        val_t* data;
     };
     
     inline bool verifyMatMul(const Matrix& m, const Matrix& n, const Matrix& p) {
-        return p == Matrix {MatrixXi(m) * MatrixXi(n)};
+        return p == Matrix {MatrixXf(m) * MatrixXf(n)};
     }
 }
 

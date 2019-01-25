@@ -9,7 +9,7 @@ using namespace Math;
 
 void testGenMatrix() {
     BEGIN_TEST
-    Matrix m {16, 16, Matrix::Mode::random};
+    Matrix m {16, 16, Matrix::Mode::randInt};
     m.print();
     Matrix n {16, 16, Matrix::Mode::unit};
     n.print();
@@ -20,7 +20,7 @@ void testGenMatrix() {
 void testReadWrite() {
     BEGIN_TEST
     const string path = "mat";
-    Matrix m {16, 16};
+    Matrix m {16, 16, Matrix::Mode::randInt};
     m.print();
     m.dump(path);
     Matrix n {path};
@@ -31,8 +31,8 @@ void testReadWrite() {
 
 void testCmp() {
     BEGIN_TEST
-    Matrix m {16, 16};
-    Matrix q {15, 15};
+    Matrix m {16, 16, Matrix::Mode::randFloat};
+    Matrix q {15, 15, Matrix::Mode::undefined};
     try {
         if (m == q) {}
         assert(0);
@@ -46,7 +46,7 @@ void testCmp() {
 
 void testCopy() {
     BEGIN_TEST
-    Matrix m {16, 16};
+    Matrix m {16, 16, Matrix::Mode::randInt};
     Matrix n {m};
     m.print();
     n.print();
@@ -59,8 +59,8 @@ void testCopy() {
 
 void testAssign() {
     BEGIN_TEST
-    Matrix m {16, 16, Matrix::Mode::random};
-    Matrix n {16, 16, Matrix::Mode::zero};
+    Matrix m {16, 16, Matrix::Mode::randInt};
+    Matrix n {16, 16, Matrix::Mode::undefined};
     n = m;
     m.print();
     n.print();
@@ -70,8 +70,8 @@ void testAssign() {
 
 void testMove() {
     BEGIN_TEST
-    Matrix m {16, 16};
-    Matrix n {15, 15};
+    Matrix m {16, 16, Matrix::Mode::randInt};
+    Matrix n {15, 15, Matrix::Mode::randInt};
     n = move(m);
     m.print();
     n.print();

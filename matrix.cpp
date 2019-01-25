@@ -12,20 +12,35 @@
 namespace Math {
     bool Matrix::verbose {false};
 
-    Matrix::Matrix(uint width, uint height, Mode mode):
-        dims {width, height} {
-        uint size = width * height;
-        data = (uint *)malloc(size * sizeof(uint));
+    Matrix::Matrix(dim_t width, dim_t height, Mode mode)
+        : dims {width, height} {
+        dim_t size = width * height;
+        data = (val_t *)malloc(size * sizeof(val_t));
         switch (mode) {
-            case Mode::random: {
+            case Mode::randFloat: {
                 if (verbose)
-                    cout << "Generating " << *this << " (random)" << endl;
+                    cout << "Generating " << *this << " (random float)" << endl;
 
-                mt19937 randGen;
-                randGen.seed(random_device{}());
-                uniform_int_distribution<mt19937::result_type> rand10 {0, 9};
-                for (uint i = 0; i < size; ++i)
-                    data[i] = rand10(randGen);
+                mt19937 randGen{random_device{}()};
+                uniform_real_distribution<> dist {0.0, 1.0};
+                for (dim_t i = 0; i < size; ++i)
+                    data[i] = (val_t)dist(randGen);
+                break;
+            }
+            case Mode::randInt: {
+                if (verbose)
+                    cout << "Generating " << *this << " (random int)" << endl;
+
+                mt19937 randGen{random_device{}()};
+                uniform_int_distribution<> dist {0, 9};
+                for (dim_t i = 0; i < size; ++i)
+                    data[i] = (val_t)dist(randGen);
+                break;
+            }
+            case Mode::undefined: {
+                if (verbose)
+                    cout << "Generating " << *this << " (undefined)" << endl;
+                // leave uninitialized
                 break;
             }
             case Mode::unit: {
@@ -35,27 +50,27 @@ namespace Math {
                 if (verbose)
                     cout << "Generating " << *this << " (unit)" << endl;
 
-                memset(data, 0, size * sizeof(uint));
-                for (uint i = 0; i < height; ++i)
-                    data[i * width + i] = 1;
+                memset(data, 0, size * sizeof(val_t));
+                for (dim_t i = 0; i < height; ++i)
+                    data[i * width + i] = (val_t)1.0;
                 break;
             }
             case Mode::zero: {
                 if (verbose)
                     cout << "Generating " << *this << " (zero)" << endl;
 
-                memset(data, 0, size * sizeof(uint));
+                memset(data, 0, size * sizeof(val_t));
                 break;
             }
         }
     }
 
-    Matrix::Matrix(const MatrixXi& other):
-        dims {(uint)other.cols(), (uint)other.rows()} {
-        uint size = dims.width * dims.height;
-        data = (uint *)malloc(size * sizeof(uint));
-        for (uint i = 0; i < dims.height; ++i)
-            for (uint j = 0; j < dims.width; ++j)
+    Matrix::Matrix(const MatrixXf& other)
+        : dims {(dim_t)other.cols(), (dim_t)other.rows()} {
+        dim_t size = dims.width * dims.height;
+        data = (val_t *)malloc(size * sizeof(val_t));
+        for (dim_t i = 0; i < dims.height; ++i)
+            for (dim_t j = 0; j < dims.width; ++j)
                 (*this)(i, j) = other(i, j);
     }
 
@@ -67,25 +82,26 @@ namespace Math {
         if (!ifs.is_open())
             throw runtime_error(DEBUG_INFO("Failed to open file " + path));
 
-        uint buf[2];
-        ifs.read((char *)buf, 2 * sizeof(uint));
+        dim_t buf[2];
+        ifs.read((char *)buf, 2 * sizeof(dim_t));
         dims = {buf[0], buf[1]};
         if (verbose)
             cout << "Found " << *this << endl;
 
-        uint size = dims.width * dims.height;
-        data = (uint *)malloc(size * sizeof(uint));
-        ifs.read((char *)data, size * sizeof(uint));
+        dim_t size = dims.width * dims.height;
+        data = (val_t *)malloc(size * sizeof(val_t));
+        ifs.read((char *)data, size * sizeof(val_t));
         ifs.close();
     }
 
-    Matrix::Matrix(const Matrix& other): dims {other.dims} {
+    Matrix::Matrix(const Matrix& other)
+        : dims {other.dims} {
         if (verbose)
             cout << "Copying " << other << endl;
 
-        uint size = dims.width * dims.height;
-        data = (uint *)malloc(size * sizeof(uint));
-        memcpy(data, other.getData(), size * sizeof(uint));
+        dim_t size = dims.width * dims.height;
+        data = (val_t *)malloc(size * sizeof(val_t));
+        memcpy(data, other.getData(), size * sizeof(val_t));
     }
 
     Matrix::Matrix(Matrix&& other) noexcept {
@@ -117,8 +133,8 @@ namespace Math {
         if (verbose)
             cout << "Comparing " << *this << endl;
 
-        uint size = dims.width * dims.height;
-        for (int i = 0; i < size; ++i) {
+        dim_t size = dims.width * dims.height;
+        for (dim_t i = 0; i < size; ++i) {
             if (data[i] != other.getData()[i]) {
                 cout << "Matrices are different" << endl;
                 cout << "Left matrix:" << endl;
@@ -140,7 +156,7 @@ namespace Math {
 
         if (verbose)
             cout << "Assigning " << *this << endl;
-        memcpy(data, other.getData(), dims.width * dims.height * sizeof(uint));
+        memcpy(data, other.getData(), dims.width * dims.height * sizeof(val_t));
         return *this;
     }
 
@@ -153,21 +169,20 @@ namespace Math {
         return *this;
     }
 
-    Matrix::operator MatrixXi() const {
-        MatrixXi ret {dims.height, dims.width};
-        for (uint i = 0; i < dims.height; ++i)
-            for (uint j = 0; j < dims.width; ++j)
+    Matrix::operator MatrixXf() const {
+        MatrixXf ret {dims.height, dims.width};
+        for (dim_t i = 0; i < dims.height; ++i)
+            for (dim_t j = 0; j < dims.width; ++j)
                 ret(i, j) = (*this)(i, j);
         return ret;
     }
 
     void Matrix::print() const {
-        streamsize ssize = to_string(dims.width * dims.height - 1).length() + 2;
         cout << "Printing " << *this << endl;
-        for (uint i = 0; i < dims.height; ++i) {
-            for (uint j = 0; j < dims.width; ++j) {
-                cout.width(ssize);
-                cout << right << data[i * dims.width + j];
+        for (dim_t i = 0; i < dims.height; ++i) {
+            for (dim_t j = 0; j < dims.width; ++j) {
+                cout.width(4);
+                cout << right << (uint)data[i * dims.width + j];
             }
             cout << endl;
         }
@@ -181,9 +196,9 @@ namespace Math {
         if (!ofs.is_open())
             throw runtime_error(DEBUG_INFO("Failed to open file " + path));
 
-        uint buf[] = {dims.width, dims.height};
-        ofs.write((char *)buf, 2 * sizeof(uint));
-        ofs.write((char *)data, dims.width * dims.height * sizeof(uint));
+        dim_t buf[] {dims.width, dims.height};
+        ofs.write((char *)buf, 2 * sizeof(val_t));
+        ofs.write((char *)data, dims.width * dims.height * sizeof(val_t));
         ofs.close();
 
         if (verbose)
