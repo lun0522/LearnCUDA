@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "macro.h"
+#include "matmul.h"
 #include "matrix.h"
 
 using namespace std;

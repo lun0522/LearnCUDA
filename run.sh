@@ -10,6 +10,11 @@ if [[ ! -d ${BUILD_DIR} ]]; then
 fi
 cd ${BUILD_DIR}
 
+# load cudart dylib
+if [[ $OSTYPE == darwin* ]]; then
+    export DYLD_LIBRARY_PATH=/usr/local/cuda/lib
+fi
+
 cmake ..
 cmake --build .
 cd "bin"

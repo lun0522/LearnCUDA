@@ -12,9 +12,9 @@
 namespace Math {
     bool Matrix::verbose {false};
 
-    Matrix::Matrix(dim_t width, dim_t height, Mode mode)
+    Matrix::Matrix(size_t width, size_t height, Mode mode)
         : dims {width, height} {
-        dim_t size = width * height;
+        size_t size = width * height;
         data = (val_t *)malloc(size * sizeof(val_t));
         switch (mode) {
             case Mode::randFloat: {
@@ -23,7 +23,7 @@ namespace Math {
 
                 mt19937 randGen{random_device{}()};
                 uniform_real_distribution<> dist {0.0, 1.0};
-                for (dim_t i = 0; i < size; ++i)
+                for (size_t i = 0; i < size; ++i)
                     data[i] = (val_t)dist(randGen);
                 break;
             }
@@ -33,7 +33,7 @@ namespace Math {
 
                 mt19937 randGen{random_device{}()};
                 uniform_int_distribution<> dist {0, 9};
-                for (dim_t i = 0; i < size; ++i)
+                for (size_t i = 0; i < size; ++i)
                     data[i] = (val_t)dist(randGen);
                 break;
             }
@@ -45,13 +45,13 @@ namespace Math {
             }
             case Mode::unit: {
                 if (width != height)
-                    throw runtime_error("Cannot create non-square unit matrix");
+                    DEBUG_INFO("Cannot create non-square unit matrix")
 
                 if (verbose)
                     cout << "Generating " << *this << " (unit)" << endl;
 
                 memset(data, 0, size * sizeof(val_t));
-                for (dim_t i = 0; i < height; ++i)
+                for (size_t i = 0; i < height; ++i)
                     data[i * width + i] = (val_t)1.0;
                 break;
             }
@@ -66,11 +66,11 @@ namespace Math {
     }
 
     Matrix::Matrix(const MatrixXf& other)
-        : dims {(dim_t)other.cols(), (dim_t)other.rows()} {
-        dim_t size = dims.width * dims.height;
+        : dims {(size_t)other.cols(), (size_t)other.rows()} {
+        size_t size = dims.width * dims.height;
         data = (val_t *)malloc(size * sizeof(val_t));
-        for (dim_t i = 0; i < dims.height; ++i)
-            for (dim_t j = 0; j < dims.width; ++j)
+        for (size_t i = 0; i < dims.height; ++i)
+            for (size_t j = 0; j < dims.width; ++j)
                 (*this)(i, j) = other(i, j);
     }
 
@@ -80,15 +80,15 @@ namespace Math {
 
         ifstream ifs {path, ios::in | ios::binary};
         if (!ifs.is_open())
-            throw runtime_error(DEBUG_INFO("Failed to open file " + path));
+            DEBUG_INFO("Failed to open file " + path)
 
-        dim_t buf[2];
-        ifs.read((char *)buf, 2 * sizeof(dim_t));
+        size_t buf[2];
+        ifs.read((char *)buf, 2 * sizeof(size_t));
         dims = {buf[0], buf[1]};
         if (verbose)
             cout << "Found " << *this << endl;
 
-        dim_t size = dims.width * dims.height;
+        size_t size = dims.width * dims.height;
         data = (val_t *)malloc(size * sizeof(val_t));
         ifs.read((char *)data, size * sizeof(val_t));
         ifs.close();
@@ -99,7 +99,7 @@ namespace Math {
         if (verbose)
             cout << "Copying " << other << endl;
 
-        dim_t size = dims.width * dims.height;
+        size_t size = dims.width * dims.height;
         data = (val_t *)malloc(size * sizeof(val_t));
         memcpy(data, other.getData(), size * sizeof(val_t));
     }
@@ -128,13 +128,13 @@ namespace Math {
 
     bool Matrix::operator==(const Matrix& other) const {
         if (dims.width != other.dims.width || dims.height != other.dims.height)
-            throw runtime_error(DEBUG_INFO("Comparing matrices of different dimensions"));
+            DEBUG_INFO("Comparing matrices of different dimensions")
 
         if (verbose)
             cout << "Comparing " << *this << endl;
 
-        dim_t size = dims.width * dims.height;
-        for (dim_t i = 0; i < size; ++i) {
+        size_t size = dims.width * dims.height;
+        for (size_t i = 0; i < size; ++i) {
             if (data[i] != other.getData()[i]) {
                 cout << "Matrices are different" << endl;
                 cout << "Left matrix:" << endl;
@@ -152,7 +152,7 @@ namespace Math {
 
     Matrix& Matrix::operator=(const Matrix& other) {
         if (dims.width != other.dims.width || dims.height != other.dims.height)
-            throw runtime_error(DEBUG_INFO("Copying matrices of different dimensions"));
+            DEBUG_INFO("Copying matrices of different dimensions")
 
         if (verbose)
             cout << "Assigning " << *this << endl;
@@ -171,16 +171,16 @@ namespace Math {
 
     Matrix::operator MatrixXf() const {
         MatrixXf ret {dims.height, dims.width};
-        for (dim_t i = 0; i < dims.height; ++i)
-            for (dim_t j = 0; j < dims.width; ++j)
+        for (size_t i = 0; i < dims.height; ++i)
+            for (size_t j = 0; j < dims.width; ++j)
                 ret(i, j) = (*this)(i, j);
         return ret;
     }
 
     void Matrix::print() const {
         cout << "Printing " << *this << endl;
-        for (dim_t i = 0; i < dims.height; ++i) {
-            for (dim_t j = 0; j < dims.width; ++j) {
+        for (size_t i = 0; i < dims.height; ++i) {
+            for (size_t j = 0; j < dims.width; ++j) {
                 cout.width(4);
                 cout << right << (uint)data[i * dims.width + j];
             }
@@ -194,10 +194,10 @@ namespace Math {
 
         ofstream ofs {path, ios::out | ios::binary};
         if (!ofs.is_open())
-            throw runtime_error(DEBUG_INFO("Failed to open file " + path));
+            DEBUG_INFO("Failed to open file " + path)
 
-        dim_t buf[] {dims.width, dims.height};
-        ofs.write((char *)buf, 2 * sizeof(val_t));
+        size_t buf[] {dims.width, dims.height};
+        ofs.write((char *)buf, 2 * sizeof(size_t));
         ofs.write((char *)data, dims.width * dims.height * sizeof(val_t));
         ofs.close();
 

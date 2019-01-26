@@ -16,11 +16,9 @@ namespace Math {
     class Matrix {
     public:
         using val_t = float;
-        using dim_t = unsigned int;
-
         struct Dims {
-            dim_t width;
-            dim_t height;
+            size_t width;
+            size_t height;
         };
         enum class Mode {
             randFloat,
@@ -30,7 +28,7 @@ namespace Math {
             zero,
         };
 
-        explicit Matrix(dim_t width, dim_t height, Mode mode);
+        explicit Matrix(size_t width, size_t height, Mode mode);
         explicit Matrix(const MatrixXf& other);
         explicit Matrix(const string& path);
         Matrix(const Matrix& other);
@@ -39,9 +37,9 @@ namespace Math {
 
         static void setVerbose(bool v) { verbose = v; }
         Dims getDims() const { return dims; }
-        const val_t* getData() const { return data; }
+        val_t* getData() const { return data; }
 
-        val_t& operator()(dim_t row, dim_t col) const {
+        val_t& operator()(size_t row, size_t col) const {
             return data[row * dims.width + col];
         }
         friend ostream& operator<<(ostream& os, const Matrix& matrix);
@@ -58,10 +56,6 @@ namespace Math {
         Dims dims;
         val_t* data;
     };
-    
-    inline bool verifyMatMul(const Matrix& m, const Matrix& n, const Matrix& p) {
-        return p == Matrix {MatrixXf(m) * MatrixXf(n)};
-    }
 }
 
 #endif //LEARNCUDA_MATRIX_H
