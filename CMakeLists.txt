@@ -1,20 +1,20 @@
 cmake_minimum_required(VERSION 3.10)
 project(LearnCUDA)
 
+find_package(CUDA REQUIRED)
+
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L/usr/local/cuda/lib --cuda-gpu-arch=sm_37")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_37,code=sm_37 -std=c++11")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if (APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lcudart")
-    set(CUDA_PATH /Developer/NVIDIA/CUDA-10.0/include/)
-    set(EIGEN_PATH /Users/lun/Desktop/Code/libs/eigen)
+    set(CUDA_INCLUDE /Developer/NVIDIA/CUDA-10.0/include/)
+    set(EIGEN_INCLUDE /Users/lun/Desktop/Code/libs/eigen)
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lcudart_static")
-    set(CUDA_PATH /usr/local/cuda-10.0/include)
-    set(EIGEN_PATH /home/lpj0522/eigen)
+    set(CUDA_INCLUDE /usr/local/cuda-10.0/include)
+    set(EIGEN_INCLUDE /home/lpj0522/eigen)
 endif()
 
-include_directories(${CUDA_PATH} ${EIGEN_PATH})
+include_directories(${CUDA_INCLUDE} ${EIGEN_INCLUDE})
 
-add_executable(LearnCUDA main.cpp matrix.cpp matrix.h macro.h matmul.cpp matmul.h)
+cuda_add_executable(LearnCUDA main.cpp matrix.cpp matrix.h macro.h matmul.cu matmul.h)

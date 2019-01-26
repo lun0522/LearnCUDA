@@ -81,10 +81,19 @@ void testMove() {
     assert(n.getDims().height == 16);
 }
 
+void testMatMul() {
+    Matrix m {32, 24, Matrix::Mode::randFloat};
+    Matrix n {16, 32, Matrix::Mode::randFloat};
+    Matrix p {16, 24, Matrix::Mode::undefined};
+    matMul(m, n, p);
+
+    assert(verifyMatMul(m, n, p));
+}
+
 void testAll() {
-    Matrix::setVerbose(true);
+    Matrix::verbose = true;
     for (auto func : {testGenMatrix, testReadWrite, testCmp,
-                      testCopy, testAssign, testMove}) {
+                      testCopy, testAssign, testMove, testMatMul}) {
         func();
         cout << endl;
     }

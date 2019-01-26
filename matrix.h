@@ -15,6 +15,7 @@ namespace Math {
 
     class Matrix {
     public:
+        static bool verbose;
         using val_t = float;
         struct Dims {
             size_t width;
@@ -35,8 +36,8 @@ namespace Math {
         Matrix(Matrix&& other) noexcept;
         ~Matrix();
 
-        static void setVerbose(bool v) { verbose = v; }
         Dims getDims() const { return dims; }
+        size_t getSize() const { return dims.width * dims.height; }
         val_t* getData() const { return data; }
 
         val_t& operator()(size_t row, size_t col) const {
@@ -52,10 +53,12 @@ namespace Math {
         void dump(const string& path) const;
 
     private:
-        static bool verbose;
         Dims dims;
         val_t* data;
     };
+
+    void matMul(const Matrix& a, const Matrix& b, Matrix& c);
+    bool verifyMatMul(const Matrix& a, const Matrix& b, const Matrix& c);
 }
 
 #endif //LEARNCUDA_MATRIX_H

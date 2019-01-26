@@ -8,13 +8,14 @@
 #include <random>
 
 #include "macro.h"
+#include "matmul.h"
 
 namespace Math {
     bool Matrix::verbose {false};
 
     Matrix::Matrix(size_t width, size_t height, Mode mode)
         : dims {width, height} {
-        size_t size = width * height;
+        size_t size = getSize();
         data = (val_t *)malloc(size * sizeof(val_t));
         switch (mode) {
             case Mode::randFloat: {
@@ -52,7 +53,7 @@ namespace Math {
 
                 memset(data, 0, size * sizeof(val_t));
                 for (size_t i = 0; i < height; ++i)
-                    data[i * width + i] = (val_t)1.0;
+                    data[i * width + i] = 1;
                 break;
             }
             case Mode::zero: {
@@ -67,8 +68,7 @@ namespace Math {
 
     Matrix::Matrix(const MatrixXf& other)
         : dims {(size_t)other.cols(), (size_t)other.rows()} {
-        size_t size = dims.width * dims.height;
-        data = (val_t *)malloc(size * sizeof(val_t));
+        data = (val_t *)malloc(getSize() * sizeof(val_t));
         for (size_t i = 0; i < dims.height; ++i)
             for (size_t j = 0; j < dims.width; ++j)
                 (*this)(i, j) = other(i, j);
@@ -88,7 +88,7 @@ namespace Math {
         if (verbose)
             cout << "Found " << *this << endl;
 
-        size_t size = dims.width * dims.height;
+        size_t size = getSize();
         data = (val_t *)malloc(size * sizeof(val_t));
         ifs.read((char *)data, size * sizeof(val_t));
         ifs.close();
@@ -99,7 +99,7 @@ namespace Math {
         if (verbose)
             cout << "Copying " << other << endl;
 
-        size_t size = dims.width * dims.height;
+        size_t size = getSize();
         data = (val_t *)malloc(size * sizeof(val_t));
         memcpy(data, other.getData(), size * sizeof(val_t));
     }
@@ -133,9 +133,9 @@ namespace Math {
         if (verbose)
             cout << "Comparing " << *this << endl;
 
-        size_t size = dims.width * dims.height;
+        size_t size = getSize();
         for (size_t i = 0; i < size; ++i) {
-            if (data[i] != other.getData()[i]) {
+            if (abs(data[i] - other.getData()[i]) > 1e-3) {
                 cout << "Matrices are different" << endl;
                 cout << "Left matrix:" << endl;
                 print();
@@ -203,5 +203,26 @@ namespace Math {
 
         if (verbose)
             cout << "Matrix written to file " << path << endl;
+    }
+
+    void matMul(const Matrix& a, const Matrix& b, Matrix& c) {
+        if (Matrix::verbose)
+            cout << "Multiplying " << a << " and " << b << endl;
+
+        uint m = a.getDims().height == c.getDims().height ?
+                 (uint)a.getDims().height : DEBUG_INFO("First dimension not match")
+        uint n = b.getDims().width == c.getDims().width ?
+                 (uint)b.getDims().width : DEBUG_INFO("Second dimension not match")
+        uint k = a.getDims().width == b.getDims().height ?
+                 (uint)a.getDims().width : DEBUG_INFO("Third dimension not match")
+
+        if (m % 8 != 0 || n % 8 != 0)
+            DEBUG_INFO("Dimension not supported")
+
+        sgemm(m, n, k, a.getData(), b.getData(), c.getData());
+    }
+
+    bool verifyMatMul(const Matrix& a, const Matrix& b, const Matrix& c) {
+        return Matrix {MatrixXf(a) * MatrixXf(b)} == c;
     }
 }
