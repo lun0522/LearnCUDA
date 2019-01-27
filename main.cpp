@@ -21,7 +21,7 @@ void testGenMatrix() {
 void testReadWrite() {
     BEGIN_TEST
     const string path = "mat";
-    Matrix m {16, 16, Matrix::Mode::randInt};
+    Matrix m {8, 16, Matrix::Mode::randInt};
     m.print();
     m.dump(path);
     Matrix n {path};
@@ -51,11 +51,11 @@ void testCopy() {
     Matrix n {m};
     m.print();
     n.print();
-    cout << "m: " << m.getData() << endl;
-    cout << "n: " << n.getData() << endl;
+    cout << "m: " << m.data() << endl;
+    cout << "n: " << n.data() << endl;
 
     assert(m == n);
-    assert(m.getData() != n.getData());
+    assert(m.data() != n.data());
 }
 
 void testAssign() {
@@ -74,17 +74,15 @@ void testMove() {
     Matrix m {16, 16, Matrix::Mode::randInt};
     Matrix n {15, 15, Matrix::Mode::randInt};
     n = move(m);
-    m.print();
     n.print();
 
-    assert(m.getDims().width  == 15);
-    assert(n.getDims().height == 16);
+    assert(n.rows() == 16);
 }
 
 void testMatMul() {
-    Matrix m {32, 24, Matrix::Mode::randFloat};
-    Matrix n {16, 32, Matrix::Mode::randFloat};
-    Matrix p {16, 24, Matrix::Mode::undefined};
+    Matrix m {24, 32, Matrix::Mode::randFloat};
+    Matrix n {32, 16, Matrix::Mode::randFloat};
+    Matrix p {24, 16, Matrix::Mode::undefined};
     matMul(m, n, p);
 
     assert(verifyMatMul(m, n, p));

@@ -9,5 +9,8 @@ cd ${BUILD_DIR}
 
 cmake ..
 cmake --build .
-cd "bin"
-./LearnCUDA
+
+if [[ $1 == "e" ]]; then
+    cd "bin"
+    ./LearnCUDA
+fi

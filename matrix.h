@@ -15,12 +15,9 @@ namespace Math {
 
     class Matrix {
     public:
-        static bool verbose;
         using val_t = float;
-        struct Dims {
-            size_t width;
-            size_t height;
-        };
+        static bool verbose;
+
         enum class Mode {
             randFloat,
             randInt,
@@ -29,21 +26,21 @@ namespace Math {
             zero,
         };
 
-        explicit Matrix(size_t width, size_t height, Mode mode);
+        explicit Matrix(size_t rows, size_t cols, Mode mode);
         explicit Matrix(const MatrixXf& other);
         explicit Matrix(const string& path);
         Matrix(const Matrix& other);
         Matrix(Matrix&& other) noexcept;
         ~Matrix();
 
-        Dims getDims() const { return dims; }
-        size_t getSize() const { return dims.width * dims.height; }
-        val_t* getData() const { return data; }
+        size_t rows() const { return num_row; }
+        size_t cols() const { return num_col; }
+        size_t size() const { return num_elem; }
+        val_t* data() const { return raw_data; }
 
         val_t& operator()(size_t row, size_t col) const {
-            return data[row * dims.width + col];
+            return data()[row * cols() + col];
         }
-        friend ostream& operator<<(ostream& os, const Matrix& matrix);
         bool operator==(const Matrix& other) const;
         Matrix& operator=(const Matrix& other);
         Matrix& operator=(Matrix&& other) noexcept;
@@ -53,10 +50,11 @@ namespace Math {
         void dump(const string& path) const;
 
     private:
-        Dims dims;
-        val_t* data;
+        size_t num_row, num_col, num_elem;
+        val_t* raw_data;
     };
 
+    ostream& operator<<(ostream& os, const Matrix& matrix);
     void matMul(const Matrix& a, const Matrix& b, Matrix& c);
     bool verifyMatMul(const Matrix& a, const Matrix& b, const Matrix& c);
 }
