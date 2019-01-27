@@ -5,10 +5,13 @@
 #ifndef LEARNCUDA_MACRO_H
 #define LEARNCUDA_MACRO_H
 
-#define BEGIN_TEST          cout << __func__ << endl;
-#define DEBUG_INFO(info)    throw runtime_error(string{"Fatal error!\n"} + \
+#include <iostream>
+#include <string>
+
+#define BEGIN_TEST          std::cout << "Running " << __func__ << std::endl;
+#define DEBUG_INFO(info)    throw std::runtime_error(std::string{"Fatal error!\n"} + \
     __func__ + "() in file " + \
-    __FILE__ + " on line " + to_string(__LINE__) + \
+    __FILE__ + " on line " + std::to_string(__LINE__) + \
     ": \n\t" + info);
 
 #endif //LEARNCUDA_MACRO_H

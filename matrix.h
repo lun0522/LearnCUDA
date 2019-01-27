@@ -42,10 +42,13 @@ namespace Math {
             return data()[row * cols() + col];
         }
         bool operator==(const Matrix& other) const;
+        bool operator!=(const Matrix& other) const { return !(*this == other); }
         Matrix& operator=(const Matrix& other);
         Matrix& operator=(Matrix&& other) noexcept;
         operator MatrixXf() const;
+        friend ostream& operator<<(ostream& os, const Matrix& matrix);
 
+        void clear() const;
         void print() const;
         void dump(const string& path) const;
 
@@ -53,10 +56,6 @@ namespace Math {
         size_t num_row, num_col, num_elem;
         val_t* raw_data;
     };
-
-    ostream& operator<<(ostream& os, const Matrix& matrix);
-    void matMul(const Matrix& a, const Matrix& b, Matrix& c);
-    bool verifyMatMul(const Matrix& a, const Matrix& b, const Matrix& c);
 }
 
 #endif //LEARNCUDA_MATRIX_H

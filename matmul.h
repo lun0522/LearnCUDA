@@ -5,7 +5,14 @@
 #ifndef LEARNCUDA_MATMUL_H
 #define LEARNCUDA_MATMUL_H
 
-void sgemm(const uint m, const uint n, const uint k,
-           const float *A, const float *B, float *C);
+#include "matrix.h"
+
+namespace Math {
+    enum MatMulAlgo {
+        MatMulAlgoA = 1 << 0,
+    };
+    void testMatMul(const Matrix& a, const Matrix& b, Matrix& c, MatMulAlgo algo);
+    Matrix eigenMatMul(const Matrix& a, const Matrix& b);
+}
 
 #endif //LEARNCUDA_MATMUL_H

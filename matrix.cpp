@@ -8,7 +8,6 @@
 #include <random>
 
 #include "macro.h"
-#include "matmul.h"
 
 namespace Math {
     bool Matrix::verbose{false};
@@ -59,7 +58,7 @@ namespace Math {
                 if (verbose)
                     cout << "Generating " << *this << " (zero)" << endl;
 
-                memset(data(), 0, size() * sizeof(val_t));
+                clear();
                 break;
             }
         }
@@ -174,6 +173,15 @@ namespace Math {
         return ret;
     }
 
+    ostream& operator<<(ostream& os, const Matrix& matrix) {
+        os << matrix.rows() << "x" << matrix.cols() << " matrix";
+        return os;
+    }
+
+    void Matrix::clear() const {
+        memset(data(), 0, size() * sizeof(val_t));
+    }
+
     void Matrix::print() const {
         cout << "Printing " << *this << endl;
         for (size_t r = 0; r < rows(); ++r) {
@@ -200,31 +208,5 @@ namespace Math {
 
         if (verbose)
             cout << "Matrix written to file " << path << endl;
-    }
-
-    ostream& operator<<(ostream& os, const Matrix& matrix) {
-        os << matrix.rows() << "x" << matrix.cols() << " matrix";
-        return os;
-    }
-
-    void matMul(const Matrix& a, const Matrix& b, Matrix& c) {
-        if (Matrix::verbose)
-            cout << "Multiplying " << a << " and " << b << endl;
-
-        uint m = a.rows() == c.rows() ?
-                 (uint)a.rows() : DEBUG_INFO("First dimension not match")
-        uint n = b.cols() == c.cols() ?
-                 (uint)b.cols() : DEBUG_INFO("Second dimension not match")
-        uint k = a.cols() == b.rows() ?
-                 (uint)a.cols() : DEBUG_INFO("Third dimension not match")
-
-        if (m % 8 != 0 || n % 8 != 0)
-            DEBUG_INFO("Dimension not supported")
-
-        sgemm(m, n, k, a.data(), b.data(), c.data());
-    }
-
-    bool verifyMatMul(const Matrix& a, const Matrix& b, const Matrix& c) {
-        return Matrix {MatrixXf(a) * MatrixXf(b)} == c;
     }
 }

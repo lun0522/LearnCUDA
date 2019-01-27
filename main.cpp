@@ -1,4 +1,3 @@
-#include <Dense>
 #include <iostream>
 
 #include "macro.h"
@@ -42,7 +41,8 @@ void testCmp() {
     }
 
     Matrix n {16, 16, Matrix::Mode::unit};
-    assert(verifyMatMul(m, n, m));
+    Matrix p = eigenMatMul(m, n);
+    assert(m == p);
 }
 
 void testCopy() {
@@ -80,12 +80,11 @@ void testMove() {
 }
 
 void testMatMul() {
-    Matrix m {24, 32, Matrix::Mode::randFloat};
-    Matrix n {32, 16, Matrix::Mode::randFloat};
-    Matrix p {24, 16, Matrix::Mode::undefined};
-    matMul(m, n, p);
-
-    assert(verifyMatMul(m, n, p));
+    const size_t dim = 1024;
+    Matrix m {dim, dim, Matrix::Mode::randFloat};
+    Matrix n {dim, dim, Matrix::Mode::randFloat};
+    Matrix p {dim, dim, Matrix::Mode::undefined};
+    testMatMul(m, n, p, MatMulAlgoA);
 }
 
 void testAll() {
@@ -95,6 +94,7 @@ void testAll() {
         func();
         cout << endl;
     }
+    cout << "All tests passed" << endl << endl;
 }
 
 int main() {
