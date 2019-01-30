@@ -9,12 +9,12 @@ set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_37,code=sm_37 -std
 
 if (APPLE)
     set(CUDA_INCLUDE /Developer/NVIDIA/CUDA-10.0/include/)
-    set(EIGEN_INCLUDE /Users/lun/Desktop/Code/libs/eigen)
 else()
-    set(CUDA_INCLUDE /usr/local/cuda-10.0/include)
-    set(EIGEN_INCLUDE /home/lpj0522/eigen)
+    set(CUDA_PATH /usr/local/cuda-10.0)
+    set(CUDA_INCLUDE ${CUDA_PATH}/include)
 endif()
 
-include_directories(${CUDA_INCLUDE} ${EIGEN_INCLUDE})
+include_directories(${CUDA_INCLUDE})
 
 cuda_add_executable(LearnCUDA main.cpp matrix.cpp matrix.h macro.h matmul.cu matmul.h)
+target_link_libraries(LearnCUDA -L${CUDA_PATH}/lib64 cublas)

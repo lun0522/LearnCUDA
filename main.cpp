@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <iostream>
 
 #include "macro.h"
@@ -41,7 +42,7 @@ void testCmp() {
     }
 
     Matrix n {16, 16, Matrix::Mode::unit};
-    Matrix p = eigenMatMul(m, n);
+    Matrix p = blasMatMul(m, n);
     assert(m == p);
 }
 
@@ -80,11 +81,10 @@ void testMove() {
 }
 
 void testMatMul() {
-    const size_t dim = 1024;
+    const size_t dim = 32;
     Matrix m {dim, dim, Matrix::Mode::randFloat};
     Matrix n {dim, dim, Matrix::Mode::randFloat};
-    Matrix p {dim, dim, Matrix::Mode::undefined};
-    testMatMul(m, n, p, MatMulAlgoA);
+    testMatMul(m, n, MatMulAlgoA);
 }
 
 void testAll() {

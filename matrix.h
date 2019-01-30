@@ -5,13 +5,11 @@
 #ifndef LEARNCUDA_MATRIX_H
 #define LEARNCUDA_MATRIX_H
 
-#include <Dense>
 #include <iostream>
 #include <string>
 
 namespace Math {
     using namespace std;
-    using Eigen::MatrixXf;
 
     class Matrix {
     public:
@@ -27,7 +25,6 @@ namespace Math {
         };
 
         explicit Matrix(size_t rows, size_t cols, Mode mode);
-        explicit Matrix(const MatrixXf& other);
         explicit Matrix(const string& path);
         Matrix(const Matrix& other);
         Matrix(Matrix&& other) noexcept;
@@ -45,7 +42,6 @@ namespace Math {
         bool operator!=(const Matrix& other) const { return !(*this == other); }
         Matrix& operator=(const Matrix& other);
         Matrix& operator=(Matrix&& other) noexcept;
-        operator MatrixXf() const;
         friend ostream& operator<<(ostream& os, const Matrix& matrix);
 
         void clear() const;

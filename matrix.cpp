@@ -6,6 +6,7 @@
 
 #include <fstream>
 #include <random>
+#include <string.h>
 
 #include "macro.h"
 
@@ -49,7 +50,7 @@ namespace Math {
                 if (verbose)
                     cout << "Generating " << *this << " (unit)" << endl;
 
-                memset(data(), 0, size() * sizeof(val_t));
+                clear();
                 for (size_t r = 0; r < rows; ++r)
                     data()[r * cols + r] = 1;
                 break;
@@ -64,16 +65,7 @@ namespace Math {
         }
     }
 
-    Matrix::Matrix(const MatrixXf& other)
-        : num_row {(size_t)other.rows()}, num_col {(size_t)other.cols()} {
-        num_elem = rows() * cols();
-        raw_data = (val_t *)malloc(size() * sizeof(val_t));
-        for (size_t r = 0; r < rows(); ++r)
-            for (size_t c = 0; c < cols(); ++c)
-                (*this)(r, c) = other(r, c);
-    }
-
-    Matrix::Matrix(const string &path) {
+    Matrix::Matrix(const string& path) {
         if (verbose)
             cout << "Reading matrix from file " << path << endl;
 
@@ -163,14 +155,6 @@ namespace Math {
         num_elem = other.size();
         swap(raw_data, other.raw_data);
         return *this;
-    }
-
-    Matrix::operator MatrixXf() const {
-        MatrixXf ret {rows(), cols()};
-        for (size_t r = 0; r < rows(); ++r)
-            for (size_t c = 0; c < cols(); ++c)
-                ret(r, c) = (*this)(r, c);
-        return ret;
     }
 
     ostream& operator<<(ostream& os, const Matrix& matrix) {
