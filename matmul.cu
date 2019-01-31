@@ -84,10 +84,32 @@ namespace Math {
         uint row = blockIdx.y * TILE_WIDTH + threadIdx.y;
         uint col = blockIdx.x * TILE_WIDTH + threadIdx.x;
 
-        float sum = 0;
+        float sum = 0.0f;
         for (uint i = 0; i < k; ++i)
             sum += A[row * k + i] * B[i * n + col];
 
+        C[row * n + col] = sum;
+    }
+
+    __global__ void matMulKernelB(const float *A, const float *B, float *C,
+                                  const uint m, const uint n, const uint k) {
+        __shared__ float aD[TILE_WIDTH][TILE_WIDTH];
+        __shared__ float bD[TILE_WIDTH][TILE_WIDTH];
+
+        uint tx = threadIdx.x, ty = threadIdx.y;
+        uint row = blockIdx.y * TILE_WIDTH + ty;
+        uint col = blockIdx.x * TILE_WIDTH + tx;
+
+        float sum = 0.0f;
+        for (int i = 0; i < k / TILE_WIDTH; ++i) {
+            aD[ty][tx] = A[row * k + (i * TILE_WIDTH + tx)];
+            bD[ty][tx] = B[(i * TILE_WIDTH + ty) * n + col];
+            __syncthreads();
+
+            for (uint j = 0; j < TILE_WIDTH; ++j)
+                sum += aD[ty][j] * bD[j][tx];
+            __syncthreads();
+        }
         C[row * n + col] = sum;
     }
 
@@ -102,7 +124,18 @@ namespace Math {
                 multiplier.m, multiplier.n, multiplier.k);
     }
 
-    void verifyKernel(bool run, const string &name, KernelFunc func,
+    void matMulB(const MatrixMultiplier &multiplier) {
+        if (multiplier.m % TILE_WIDTH != 0 || multiplier.n % TILE_WIDTH != 0)
+            DEBUG_INFO("Dimension not supported")
+
+        dim3 dimBlock{TILE_WIDTH, TILE_WIDTH};
+        dim3 dimGrid{multiplier.n / TILE_WIDTH, multiplier.m / TILE_WIDTH};
+        matMulKernelB<<<dimGrid, dimBlock>>>(
+                multiplier.pA, multiplier.pB, multiplier.pC,
+                multiplier.m, multiplier.n, multiplier.k);
+    }
+
+    void verifyKernel(uint run, const string &name, KernelFunc func,
                       const MatrixMultiplier &multiplier) {
         if (run) {
             func(multiplier);
@@ -113,24 +146,24 @@ namespace Math {
         }
     }
 
-    void repeatWithTimer(bool run, const string &name, KernelFunc func,
+    void repeatWithTimer(uint run, const string &name, KernelFunc func,
                          const MatrixMultiplier &multiplier) {
         if (run) {
-            auto begin = chrono::steady_clock::now();
+            using namespace chrono;
+            auto begin = steady_clock::now();
 
             for (uint i = 0; i < REPEAT_TIMES; ++i)
                 func(multiplier);
             cudaDeviceSynchronize();
 
-            auto end = chrono::steady_clock::now();
-            auto diff = (start - end).count();
-            auto time = chrono::duration_cast<chrono::microseconds>diff;
+            auto end = steady_clock::now();
+            auto time = duration_cast<microseconds>(end - begin);
             cout << name << ": ";
-            cout << time / 1000.0 / REPEAT_TIMES << "ms" << endl;
+            cout << time.count() / 1000.0 / REPEAT_TIMES << "ms" << endl;
         }
     }
 
-    void testMatMul(const Matrix &a, const Matrix &b, MatMulAlgo algo) {
+    void testMatMul(const Matrix &a, const Matrix &b, uint algo) {
         if (Matrix::verbose)
             cout << "Multiplying " << a << " and " << b << endl;
 
@@ -143,12 +176,14 @@ namespace Math {
         MatrixMultiplier multiplier{a, b, c, &ref};
 
         verifyKernel(algo & MatMulAlgoA, "A", matMulA, multiplier);
+        verifyKernel(algo & MatMulAlgoB, "B", matMulB, multiplier);
 
         /* record elapsed time */
         if (Matrix::verbose)
             cout << endl << "Reporting elapsed time of algorithms" << endl;
 
         repeatWithTimer(algo & MatMulAlgoA, "A", matMulA, multiplier);
+        repeatWithTimer(algo & MatMulAlgoB, "B", matMulB, multiplier);
 
         if (Matrix::verbose)
             cout << endl;

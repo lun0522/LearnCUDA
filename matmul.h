@@ -10,9 +10,10 @@
 namespace Math {
     enum MatMulAlgo {
         MatMulAlgoA = 1 << 0,
+        MatMulAlgoB = 1 << 1,
     };
 
-    void testMatMul(const Matrix &a, const Matrix &b, MatMulAlgo algo);
+    void testMatMul(const Matrix &a, const Matrix &b, uint algo);
     Matrix blasMatMul(const Matrix &a, const Matrix &b);
 } // namespace Math
 
