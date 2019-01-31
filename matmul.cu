@@ -14,7 +14,7 @@
 
 namespace Math {
     struct MatrixMultiplier;
-    using KernelFunc = void (const MatrixMultiplier&);
+    using KernelFunc = void(const MatrixMultiplier&);
 
     static const uint REPEAT_TIMES = 10;
     static const uint TILE_WIDTH = 32;
@@ -25,8 +25,9 @@ namespace Math {
         float *pA, *pB, *pC;
         const Matrix &mC, *pRef;
 
-        MatrixMultiplier(const Matrix& a, const Matrix& b, const Matrix& c, const Matrix* ref)
-            : mC {c}, pRef {ref} {
+        MatrixMultiplier(const Matrix &a, const Matrix &b, const Matrix &c,
+                         const Matrix *ref)
+            : mC{c}, pRef{ref} {
             if (Matrix::verbose) {
                 cout << "Extracting matrices data" << endl;
                 cout << "A: " << a << endl;
@@ -53,7 +54,9 @@ namespace Math {
         }
 
         bool predicate() const {
-            if (!pRef) DEBUG_INFO("No reference matrix")
+            if (!pRef)
+                DEBUG_INFO("No reference matrix")
+
             return mC == *pRef;
         }
 
@@ -76,7 +79,7 @@ namespace Math {
         }
     };
 
-    __global__ void matMulKernelA(const float* A, const float* B, float* C,
+    __global__ void matMulKernelA(const float *A, const float *B, float *C,
                                   const uint m, const uint n, const uint k) {
         uint row = blockIdx.y * TILE_WIDTH + threadIdx.y;
         uint col = blockIdx.x * TILE_WIDTH + threadIdx.x;
@@ -88,17 +91,19 @@ namespace Math {
         C[row * n + col] = sum;
     }
 
-    void matMulA(const MatrixMultiplier& multiplier) {
+    void matMulA(const MatrixMultiplier &multiplier) {
         if (multiplier.m % TILE_WIDTH != 0 || multiplier.n % TILE_WIDTH != 0)
             DEBUG_INFO("Dimension not supported")
 
-        dim3 dimBlock {TILE_WIDTH, TILE_WIDTH};
-        dim3 dimGrid {multiplier.n / TILE_WIDTH, multiplier.m / TILE_WIDTH};
-        matMulKernelA<<<dimGrid, dimBlock>>>(multiplier.pA, multiplier.pB, multiplier.pC,
-                                             multiplier.m, multiplier.n, multiplier.k);
+        dim3 dimBlock{TILE_WIDTH, TILE_WIDTH};
+        dim3 dimGrid{multiplier.n / TILE_WIDTH, multiplier.m / TILE_WIDTH};
+        matMulKernelA<<<dimGrid, dimBlock>>>(
+                multiplier.pA, multiplier.pB, multiplier.pC,
+                multiplier.m, multiplier.n, multiplier.k);
     }
 
-    void verifyKernel(bool run, string name, KernelFunc func, const MatrixMultiplier& multiplier) {
+    void verifyKernel(bool run, const string &name, KernelFunc func,
+                      const MatrixMultiplier &multiplier) {
         if (run) {
             func(multiplier);
             multiplier.transfer();
@@ -108,21 +113,24 @@ namespace Math {
         }
     }
 
-    void repeatWithTimer(bool run, string name, KernelFunc func, const MatrixMultiplier& multiplier) {
+    void repeatWithTimer(bool run, const string &name, KernelFunc func,
+                         const MatrixMultiplier &multiplier) {
         if (run) {
-            using chrono::steady_clock;
-            steady_clock::time_point begin = steady_clock::now();
+            auto begin = chrono::steady_clock::now();
 
-            for (uint i = 0; i < REPEAT_TIMES; ++i) func(multiplier);
+            for (uint i = 0; i < REPEAT_TIMES; ++i)
+                func(multiplier);
             cudaDeviceSynchronize();
 
-            steady_clock::time_point end = steady_clock::now();
-            auto time = chrono::duration_cast<chrono::microseconds>(end - begin).count();
-            cout << name << ": " << time / 1000.0 / REPEAT_TIMES << "ms" << std::endl;
+            auto end = chrono::steady_clock::now();
+            auto diff = (start - end).count();
+            auto time = chrono::duration_cast<chrono::microseconds>diff;
+            cout << name << ": ";
+            cout << time / 1000.0 / REPEAT_TIMES << "ms" << endl;
         }
     }
 
-    void testMatMul(const Matrix& a, const Matrix& b, MatMulAlgo algo) {
+    void testMatMul(const Matrix &a, const Matrix &b, MatMulAlgo algo) {
         if (Matrix::verbose)
             cout << "Multiplying " << a << " and " << b << endl;
 
@@ -131,8 +139,8 @@ namespace Math {
             cout << endl << "Verifying correctness of algorithms" << endl;
 
         Matrix ref = blasMatMul(a, b);
-        Matrix c {a.rows(), b.cols(), Matrix::Mode::undefined};
-        MatrixMultiplier multiplier {a, b, c, &ref};
+        Matrix c{a.rows(), b.cols(), Matrix::Mode::undefined};
+        MatrixMultiplier multiplier{a, b, c, &ref};
 
         verifyKernel(algo & MatMulAlgoA, "A", matMulA, multiplier);
 
@@ -141,25 +149,31 @@ namespace Math {
             cout << endl << "Reporting elapsed time of algorithms" << endl;
 
         repeatWithTimer(algo & MatMulAlgoA, "A", matMulA, multiplier);
+
+        if (Matrix::verbose)
+            cout << endl;
     }
 
-    Matrix blasMatMul(const Matrix& a, const Matrix& b) {
+    Matrix blasMatMul(const Matrix &a, const Matrix &b) {
         if (Matrix::verbose)
             cout << "Matrix multiply via cuBLAS" << endl;
 
-        Matrix c {a.rows(), b.cols(), Matrix::Mode::undefined};
-        MatrixMultiplier multiplier {a, b, c, nullptr};
+        Matrix c{a.rows(), b.cols(), Matrix::Mode::undefined};
+        MatrixMultiplier multiplier{a, b, c, nullptr};
 
-        int lda = (int)multiplier.m, ldb = (int)multiplier.k, ldc = (int)multiplier.m;
+        /* Note that cuBLAS expects matrices stored in column-major */
+        int lda = multiplier.n, ldb = multiplier.k, ldc = multiplier.n;
         float alpha = 1.0f, beta = 0.0f;
 
         cublasHandle_t handle;
         cublasCreate(&handle);
-        cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, multiplier.m, multiplier.n, multiplier.k,
-                    &alpha, multiplier.pA, lda, multiplier.pB, ldb, &beta, multiplier.pC, ldc);
+        cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+                    multiplier.n, multiplier.m, multiplier.k,
+                    &alpha, multiplier.pB, lda, multiplier.pA, ldb,
+                    &beta, multiplier.pC, ldc);
         cublasDestroy(handle);
 
         multiplier.transfer();
         return c;
     }
-}
+} // namespace Math

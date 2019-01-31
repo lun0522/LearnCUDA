@@ -11,8 +11,9 @@ namespace Math {
     enum MatMulAlgo {
         MatMulAlgoA = 1 << 0,
     };
-    void testMatMul(const Matrix& a, const Matrix& b, MatMulAlgo algo);
-    Matrix blasMatMul(const Matrix& a, const Matrix& b);
-}
 
-#endif //LEARNCUDA_MATMUL_H
+    void testMatMul(const Matrix &a, const Matrix &b, MatMulAlgo algo);
+    Matrix blasMatMul(const Matrix &a, const Matrix &b);
+} // namespace Math
+
+#endif // LEARNCUDA_MATMUL_H

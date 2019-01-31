@@ -14,7 +14,7 @@ namespace Math {
     bool Matrix::verbose{false};
 
     Matrix::Matrix(size_t rows, size_t cols, Mode mode)
-        : num_row {rows}, num_col {cols}, num_elem {rows * cols} {
+        : num_row{rows}, num_col{cols}, num_elem{rows * cols} {
         raw_data = (val_t *)malloc(size() * sizeof(val_t));
         switch (mode) {
             case Mode::randFloat: {
@@ -22,7 +22,7 @@ namespace Math {
                     cout << "Generating " << *this << " (random float)" << endl;
 
                 mt19937 randGen{random_device{}()};
-                uniform_real_distribution<> dist {0.0, 1.0};
+                uniform_real_distribution<> dist{0.0, 1.0};
                 for (size_t i = 0; i < size(); ++i)
                     data()[i] = (val_t)dist(randGen);
                 break;
@@ -32,7 +32,7 @@ namespace Math {
                     cout << "Generating " << *this << " (random int)" << endl;
 
                 mt19937 randGen{random_device{}()};
-                uniform_int_distribution<> dist {0, 9};
+                uniform_int_distribution<> dist{0, 9};
                 for (size_t i = 0; i < size(); ++i)
                     data()[i] = (val_t)dist(randGen);
                 break;
@@ -65,11 +65,11 @@ namespace Math {
         }
     }
 
-    Matrix::Matrix(const string& path) {
+    Matrix::Matrix(const string &path) {
         if (verbose)
             cout << "Reading matrix from file " << path << endl;
 
-        ifstream ifs {path, ios::in | ios::binary};
+        ifstream ifs{path, ios::in | ios::binary};
         if (!ifs.is_open())
             DEBUG_INFO("Failed to open file " + path)
 
@@ -86,8 +86,8 @@ namespace Math {
         ifs.close();
     }
 
-    Matrix::Matrix(const Matrix& other)
-        : num_row {other.rows()}, num_col {other.cols()}, num_elem {other.size()} {
+    Matrix::Matrix(const Matrix &other)
+        : num_row{other.rows()}, num_col{other.cols()}, num_elem{other.size()} {
         if (verbose)
             cout << "Copying " << other << endl;
 
@@ -95,8 +95,8 @@ namespace Math {
         memcpy(data(), other.data(), size() * sizeof(val_t));
     }
 
-    Matrix::Matrix(Matrix&& other) noexcept
-        : num_row {other.rows()}, num_col {other.cols()}, num_elem {other.size()} {
+    Matrix::Matrix(Matrix &&other) noexcept
+        : num_row{other.rows()}, num_col{other.cols()}, num_elem{other.size()} {
         if (verbose)
             cout << "Moving " << other << endl;
 
@@ -111,7 +111,7 @@ namespace Math {
         delete data();
     }
 
-    bool Matrix::operator==(const Matrix& other) const {
+    bool Matrix::operator==(const Matrix &other) const {
         if (rows() != other.rows() || cols() != other.cols())
             DEBUG_INFO("Comparing matrices of different dimensions")
 
@@ -121,7 +121,8 @@ namespace Math {
         for (size_t r = 0; r < rows(); ++r) {
             for (size_t c = 0; c < cols(); ++c) {
                 if (abs((*this)(r, c) - other(r, c)) > 1e-3) {
-                    cout << "Matrices are different at (" << r << ", " << c << ")" << endl;
+                    cout << "Matrices are different at ";
+                    cout << "(" << r << ", " << c << ")" << endl;
                     cout << "Left matrix:" << endl;
                     print();
                     cout << "Right matrix: " << endl;
@@ -136,7 +137,7 @@ namespace Math {
         return true;
     }
 
-    Matrix& Matrix::operator=(const Matrix& other) {
+    Matrix &Matrix::operator=(const Matrix &other) {
         if (rows() != other.rows() || cols() != other.cols())
             DEBUG_INFO("Copying matrices of different dimensions")
 
@@ -146,7 +147,7 @@ namespace Math {
         return *this;
     }
 
-    Matrix& Matrix::operator=(Matrix&& other) noexcept {
+    Matrix &Matrix::operator=(Matrix &&other) noexcept {
         if (verbose)
             cout << "Moving " << other << " to " << *this << endl;
 
@@ -157,14 +158,12 @@ namespace Math {
         return *this;
     }
 
-    ostream& operator<<(ostream& os, const Matrix& matrix) {
+    ostream &operator<<(ostream &os, const Matrix &matrix) {
         os << matrix.rows() << "x" << matrix.cols() << " matrix";
         return os;
     }
 
-    void Matrix::clear() const {
-        memset(data(), 0, size() * sizeof(val_t));
-    }
+    void Matrix::clear() const { memset(data(), 0, size() * sizeof(val_t)); }
 
     void Matrix::print() const {
         cout << "Printing " << *this << endl;
@@ -177,15 +176,15 @@ namespace Math {
         }
     }
 
-    void Matrix::dump(const string& path) const {
+    void Matrix::dump(const string &path) const {
         if (verbose)
             cout << "Writing matrix to file " << path << endl;
 
-        ofstream ofs {path, ios::out | ios::binary};
+        ofstream ofs{path, ios::out | ios::binary};
         if (!ofs.is_open())
             DEBUG_INFO("Failed to open file " + path)
 
-        size_t buf[] {rows(), cols()};
+        size_t buf[]{rows(), cols()};
         ofs.write((char *)buf, 2 * sizeof(size_t));
         ofs.write((char *)data(), size() * sizeof(val_t));
         ofs.close();
@@ -193,4 +192,4 @@ namespace Math {
         if (verbose)
             cout << "Matrix written to file " << path << endl;
     }
-}
+} // namespace Math
