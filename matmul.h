@@ -11,6 +11,8 @@ namespace Math {
     enum MatMulAlgo {
         MatMulAlgoA = 1 << 0,
         MatMulAlgoB = 1 << 1,
+        MatMulAlgoC = 1 << 2,
+        MatMulAlgoD = 1 << 3,
     };
 
     void testMatMul(const Matrix &a, const Matrix &b, uint algo);

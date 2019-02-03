@@ -84,7 +84,7 @@ void testMatMul() {
     const size_t dim = 1024;
     Matrix m{dim, dim, Matrix::Mode::randFloat};
     Matrix n{dim, dim, Matrix::Mode::randFloat};
-    testMatMul(m, n, MatMulAlgoA | MatMulAlgoB);
+    testMatMul(m, n, MatMulAlgoA | MatMulAlgoB | MatMulAlgoC | MatMulAlgoD);
 }
 
 void testAll() {

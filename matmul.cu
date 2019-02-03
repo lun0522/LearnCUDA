@@ -12,7 +12,7 @@
 #include "matmul_impl.h"
 
 namespace Math {
-    using KernelFunc = void(const MatrixMultiplier&);
+    using KernelFunc = void (const MatrixMultiplier&);
 
     static const uint REPEAT_TIMES = 10;
 
@@ -58,6 +58,8 @@ namespace Math {
 
         verifyKernel(algo & MatMulAlgoA, "A", matMulA, multiplier);
         verifyKernel(algo & MatMulAlgoB, "B", matMulB, multiplier);
+        verifyKernel(algo & MatMulAlgoC, "C", matMulC, multiplier);
+        verifyKernel(algo & MatMulAlgoD, "D", matMulD, multiplier);
 
         /* record elapsed time */
         if (Matrix::verbose)
@@ -65,6 +67,8 @@ namespace Math {
 
         repeatWithTimer(algo & MatMulAlgoA, "A", matMulA, multiplier);
         repeatWithTimer(algo & MatMulAlgoB, "B", matMulB, multiplier);
+        repeatWithTimer(algo & MatMulAlgoC, "C", matMulC, multiplier);
+        repeatWithTimer(algo & MatMulAlgoD, "D", matMulD, multiplier);
 
         if (Matrix::verbose)
             cout << endl;
