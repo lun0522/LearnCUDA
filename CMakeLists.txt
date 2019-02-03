@@ -16,5 +16,5 @@ endif()
 
 include_directories(${CUDA_INCLUDE})
 
-cuda_add_executable(LearnCUDA main.cpp matrix.cpp matrix.h macro.h matmul.cu matmul.h)
+cuda_add_executable(LearnCUDA main.cpp matrix.cpp matrix.h macro.h matmul.cu matmul.h matmul_impl.cu matmul_impl.h)
 target_link_libraries(LearnCUDA -L${CUDA_PATH}/lib64 cublas)
