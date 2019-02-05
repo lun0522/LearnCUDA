@@ -26,6 +26,7 @@ namespace Math {
     void matMulB(const MatrixMultiplier &multiplier);
     void matMulC(const MatrixMultiplier &multiplier);
     void matMulD(const MatrixMultiplier &multiplier);
+    void matMulE(const MatrixMultiplier &multiplier);
 }
 
 #endif //LEARNCUDA_MATMUL_IMPL_H

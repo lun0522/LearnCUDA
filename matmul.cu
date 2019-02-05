@@ -60,6 +60,7 @@ namespace Math {
         verifyKernel(algo & MatMulAlgoB, "B", matMulB, multiplier);
         verifyKernel(algo & MatMulAlgoC, "C", matMulC, multiplier);
         verifyKernel(algo & MatMulAlgoD, "D", matMulD, multiplier);
+        verifyKernel(algo & MatMulAlgoE, "E", matMulE, multiplier);
 
         /* record elapsed time */
         if (Matrix::verbose)
@@ -69,6 +70,7 @@ namespace Math {
         repeatWithTimer(algo & MatMulAlgoB, "B", matMulB, multiplier);
         repeatWithTimer(algo & MatMulAlgoC, "C", matMulC, multiplier);
         repeatWithTimer(algo & MatMulAlgoD, "D", matMulD, multiplier);
+        repeatWithTimer(algo & MatMulAlgoE, "E", matMulE, multiplier);
 
         if (Matrix::verbose)
             cout << endl;
